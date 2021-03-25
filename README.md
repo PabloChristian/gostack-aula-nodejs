@@ -18,6 +18,5 @@ yarn install
 Digite o comando abaixo para executar o servidor Node:
 ```bash
 yarn dev
-yarn install
 ```
 Observação: por "de baixo dos panos", a aplicação estará executando o comando 'yarn nodemon src/index.js'
