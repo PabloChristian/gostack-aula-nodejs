@@ -1,11 +1,30 @@
 const express = require('express');
-const { uuid } = require('uuidv4');
+const { uuid, isUuid } = require('uuidv4');
 const app = express();
 app.use(express.json());
 
 const projects = [];
 
-// GET 
+function logRequests(request, response, next){
+  const { method, url } = request;
+  const logLabel = `[${method.toUpperCase()}] ${url}`;
+  console.time(logLabel);
+  next();
+  console.timeEnd(logLabel);
+}
+
+function validateProjectId(request, response, next) {
+  const { id } = request.params;
+
+  if(!isUuid(id)) {
+    return response.status(400).json({ error: 'Invalid project Id.'});
+  }
+  return next();
+}
+
+app.use(logRequests); //middleware para todas as rotas.
+app.use('/projects/:id', validateProjectId); //middleware apenas para a rota informada.
+
 app.get('/projects', (request, response) => {
   const { title } = request.query;
   const results = title
@@ -14,7 +33,6 @@ app.get('/projects', (request, response) => {
   return response.json(results);
 });
 
-// POST
 app.post('/projects', (request, response) => {
   const { title, owner } = request.body;
   const project = { id: uuid(), title, owner };
@@ -22,7 +40,6 @@ app.post('/projects', (request, response) => {
   return response.json(project);
 });
 
-// PUT
 app.put('/projects/:id', (request, response) => {
   const { id, title, owner } = request.body;
   const projectIndex = projects.findIndex(project => project.id == id);
@@ -38,7 +55,6 @@ app.put('/projects/:id', (request, response) => {
   return response.json(project);
 });
 
-// DELETE
 app.delete('/projects/:id', (request, response) => {
   const { id } = request.params;
   const projectIndex = projects.findIndex(project => project.id == id);
@@ -49,7 +65,6 @@ app.delete('/projects/:id', (request, response) => {
   return response.status(204).send();
 });
 
-// LISTEN PORT
 app.listen(3333, () => {
-  console.log('😉️ Back-end iniciado!');
+  console.log('🚀️ Back-end iniciado!');
 });
